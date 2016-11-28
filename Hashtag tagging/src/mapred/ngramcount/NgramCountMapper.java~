@@ -1,0 +1,92 @@
+
+
+package mapred.ngramcount;
+
+import java.io.IOException;
+
+import mapred.util.Tokenizer;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+
+public class NgramCountMapper extends Mapper<LongWritable, Text, Text, NullWritable> {
+
+	//Adding the execute function
+	static void execute(String[] s,int n,LongWritable key, Text value, Context context)
+	throws IOException, InterruptedException{
+		String out[][] = new String[s.length/n][];
+		int jj=0;
+
+		for (int i=0;i<=s.length-n;i=i+n){
+			String[] ngram = new String[n];
+			int c;
+
+			for (c=0;c<n;c++){
+				int k = i+c;
+				ngram[c]=s[k];
+			}
+			
+			StringBuilder value1 = new StringBuilder();
+			for(String w : ngram){
+				value1.append(w);
+				value1.append(" ");	
+			}
+		
+			String aaa = value1.toString();
+			//System.out.println(aaa);
+			context.write(new Text(aaa), NullWritable.get());
+		}
+	}
+	//
+	@Override
+	protected void map(LongWritable key, Text value, Context context)
+			throws IOException, InterruptedException {
+		String line = value.toString();
+		String[] words = Tokenizer.tokenize(line);
+		int n = 1;
+		int length = words.length;
+		//first we append the array with null values
+		int con = length%n;
+
+		if (con != 0){
+			String[] app = new String[n-con];
+
+			//fixing null value
+			for(int p=0;p<app.length;p++){
+				app[p]="dummy";
+			}
+			
+			//appending the array with null
+			String[] s = new String[length+app.length];
+			//System.out.println(s.length);
+			int j=0;
+
+			for(int i=0;i<s.length;i++){
+				if(i<length){
+					s[i]=words[i];
+					//System.out.println(s[i]);
+				}
+				else{
+					//System.out.println("in else");	
+					//System.out.println(i);
+					s[i]=app[j];
+					j=j+1;
+				} 
+			}
+			
+			execute(s,n,key,value,context);
+			
+		}//con
+		else{
+			String[] s = new String[length];
+			for (int i=0;i<length;i++){
+				s[i]=words[i];
+			}
+
+			execute(s,n,key,value,context);
+		
+		}
+	}
+}

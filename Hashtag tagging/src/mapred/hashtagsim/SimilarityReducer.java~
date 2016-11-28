@@ -1,0 +1,48 @@
+package mapred.hashtagsim;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Reducer;
+
+public class SimilarityReducer extends Reducer<Text, IntWritable,  Text, IntWritable> {
+
+	//Log log = LogFactory.getLog(SimilarityReducer.class);
+	
+	@Override
+	protected void reduce(Text key, Iterable<IntWritable> value,
+			Context context)
+			throws IOException, InterruptedException {		
+		
+		//log.info("[KEY]"+key);
+	
+		int count = 0;
+		//Map<String, Integer> counts = new HashMap<String, Integer>();
+		for (IntWritable single : value) {
+			System.out.println(single);
+			System.out.println("****************************************");
+			//log.info("[VALUE_R]"+single.get());	
+			count=count+single.get();//Integer.parseInt(single);
+		}	
+		
+		
+		
+		/*
+		 * We're serializing the word cooccurrence count as a string of the following form:
+		 * 
+		 * word1:count1;word2:count2;...;wordN:countN;
+		 */
+		
+		
+		
+		//context.write(new IntWritable(count), key);
+		//if (count != 0)
+			context.write(key, new IntWritable(count));
+	}
+}
